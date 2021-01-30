@@ -1,0 +1,16 @@
+{
+  "name": "firewatch",
+  "version": "1.0.0",
+  "description": "Monitors a GitHub repository for issues or pull requests that receive upvotes over a certain rate in a timeperiod",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "@actions/github": "^4.0.0",
+    "axios": "^0.21.1"
+  }
+}
