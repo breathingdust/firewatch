@@ -5,21 +5,14 @@ const fsPromises = require('fs').promises;
 const fs = require('fs');
 
 async function main() {
-  // const githubToken = core.getInput('github_token');
-  // const org = core.getInput('org');
-  // const repo = core.getInput('repo');
-  // const alertThreshold = core.getInput('alertThreshold'); 
-  // const firewatchData = core.getInput('firewatchData');
-  // const slackToken = core.getInput('slack_token');
-  // const slackChannel = core.getInput('slack_channel');
-
-
-  // get all issues and PRs created in the last month with their reaction total count
-  // save as json as artifact id, artifact count
-
-  // load previous run, if none found exit.
-  // compare files, flag any with a difference of greater than threshold.
-  // if any found, ping in slack.
+  const githubToken = core.getInput('github_token');
+  const org = core.getInput('org');
+  const repo = core.getInput('repo');
+  const alertThreshold = core.getInput('alert_threshold');
+  const firewatchData = core.getInput('firewatch_data');
+  const issue_age_months = core.getInput('issue_age_months');
+  const slackToken = core.getInput('slack_token');
+  const slackChannel = core.getInput('slack_channel');
 
   let previousMap = new Map();
 
@@ -28,14 +21,14 @@ async function main() {
       let previousMapData = await fsPromises.readFile(firewatchData);
       previousMap = new Map(JSON.parse(previousMapData));
     } catch (error) {
-      console.log(error)
+      core.setFailed(`Getting existing data from '${firewatchData}' failed with error ${error}`);
     }
   }
 
-  console.log(`Existing map has ${previousMap.size} entries`)
+  core.info(`Existing map has ${previousMap.size} entries.`);
 
   let d = new Date();
-  d.setMonth(d.getMonth() - 1);
+  d.setMonth(d.getMonth() - issue_age_months);
 
   const octokit = github.getOctokit(githubToken, {
     previews: ["squirrel-girl"]
@@ -55,24 +48,28 @@ async function main() {
     }
   });
 
+  core.info(`Current map has ${currentMap.size} entries`);
+
   let alerts = [];
 
-  for (const [key, value] of currentMap.entries()) {
-    if (previousMap.has(key)) {
-      let diff = value - previousMap.get(key);
-      console.log(diff);
-      if (diff < 0) diff *= -1;
-      if (diff > alertThreshold) {
-        alerts.push(key);
-      }
-    } else {
-      if (value > alertThreshold) {
-        alerts.push(key);
+  if (previousMap.size > 0) {
+    for (const [key, value] of currentMap.entries()) {
+      if (previousMap.has(key)) {
+        let diff = value - previousMap.get(key);
+        console.log(diff);
+        if (diff < 0) diff *= -1;
+        if (diff > alertThreshold) {
+          alerts.push(key);
+        }
+      } else {
+        if (value > alertThreshold) {
+          alerts.push(key);
+        }
       }
     }
   }
 
-  console.log(`${alerts.length} alerts found.`);
+  core.info(`${alerts.length} alerts found.`);
 
   if (alerts.length > 0) {
     let alertLines = '';
@@ -103,27 +100,29 @@ async function main() {
       ],
     };
 
-    axios({
-      method: 'post',
-      url: 'https://slack.com/api/chat.postMessage',
-      headers: { Authorization: `Bearer ${slackToken}` },
-      data: postMessageBody,
-    })
-      .then((res) => {
-        core.info(`Slack Response: ${res.statusCode}`);
-        core.info(res.data);
-      })
-      .catch((error) => {
-        core.setFailed(`Posting to slack failed with error ${error}`);
-      });
-  }
+    core.info(JSON.stringify(postMessageBody));
 
-  try {
-    await fsPromises.writeFile(firewatchData, JSON.stringify(Array.from(currentMap.entries())));
-  } catch (error) {
-    console.log(error)
+    // axios({
+    //   method: 'post',
+    //   url: 'https://slack.com/api/chat.postMessage',
+    //   headers: { Authorization: `Bearer ${slackToken}` },
+    //   data: postMessageBody,
+    // })
+    //   .then((res) => {
+    //     core.info(`Slack Response: ${res.statusCode}`);
+    //     core.info(res.data);
+    //   })
+    //   .catch((error) => {
+    //     core.setFailed(`Posting to slack failed with error ${error}`);
+    //   });
+    //}
+
+    try {
+      await fsPromises.writeFile(firewatchData, JSON.stringify(Array.from(currentMap.entries())));
+    } catch (error) {
+      core.setFailed(`Writing to ${firewatchData} failed with error ${error}`);
+    }
   }
-  console.log(`Current map has ${currentMap.size} entries`);
 }
 
 try {
