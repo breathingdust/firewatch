@@ -38,7 +38,8 @@ async function main() {
 
   let issuesResult = await octokit
     .paginate("GET /search/issues", {
-      q: `is:open repo:${org}/${repo} created:>${d.toLocaleDateString("en-ca")}`,
+      q: `is:open repo:${org}/${repo} created:>${d.toISOString().split('T')[0]
+        }`,
       per_page: 100,
     });
 
