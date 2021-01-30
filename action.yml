@@ -7,6 +7,9 @@ inputs:
   org:
     description: 'The organization to use.'
     required: true
+  repo:
+    description: 'The repository name.'
+    required: true
   alert_threshold:
     description: Threshold to use when determining alert status of an issue.
     required: true
