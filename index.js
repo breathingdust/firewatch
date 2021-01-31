@@ -87,9 +87,9 @@ async function main() {
 
   if (alerts.length > 0) {
     let alertLines = '';
-    for (const [key, value] of currentMap.entries()) {
-      alertLines += `<https://github.com/${org}/${repo}/issues/${key}>\n`;
-    }
+    alerts.forEach(alert => {
+      alertLines += `<https://github.com/${org}/${repo}/issues/${alert}>\n`;
+    });
 
     const postMessageBody = {
       channel: slackChannel,
