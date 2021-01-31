@@ -1,1 +1,3 @@
-*.data
+firewatch.*
+index_local.js
+secrets.data

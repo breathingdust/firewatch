@@ -13,9 +13,6 @@ inputs:
   alert_threshold:
     description: Threshold to use when determining alert status of an issue.
     required: true
-  firewatch_data:
-    description: Serialized map data containing issues and counts.
-    required: true
   issue_age_months:
     description: Age of issues to include.
     required: true
