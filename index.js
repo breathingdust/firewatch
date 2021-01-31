@@ -28,7 +28,7 @@ async function main() {
 
   let previousMap = new Map();
 
-  fs.readdirSync(testFolder).forEach(file => {
+  fs.readdirSync('').forEach(file => {
     console.log(file);
   });
 
