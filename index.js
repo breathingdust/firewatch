@@ -5,7 +5,6 @@ const fsPromises = require('fs').promises;
 const fs = require('fs');
 const unzipper = require('unzipper')
 
-
 async function main() {
   const firewatchData = 'firewatch.data';
 
@@ -24,17 +23,21 @@ async function main() {
   try {
     await downloadPreviousArtifact(octokit, org, repo);
   } catch (error) {
-    core.setFailed(`Unable to download previous artifact: ${error}`);
+    core.setFailed(`Unable to download previous artifact: ${error}.`);
   }
 
   let previousMap = new Map();
+
+  fs.readdirSync(testFolder).forEach(file => {
+    console.log(file);
+  });
 
   if (fs.existsSync(firewatchData)) {
     try {
       let previousMapData = await fsPromises.readFile(firewatchData);
       previousMap = new Map(JSON.parse(previousMapData));
     } catch (error) {
-      core.setFailed(`Getting existing data from '${firewatchData}' failed with error ${error}`);
+      core.setFailed(`Getting existing data from '${firewatchData}' failed with error ${error}.`);
     }
     core.info('Firewatch data loaded successfully');
     core.info(`Existing map has ${previousMap.size} entries.`);
@@ -60,7 +63,7 @@ async function main() {
     }
   });
 
-  core.info(`Current map has ${currentMap.size} entries`);
+  core.info(`Current map has ${currentMap.size} entries.`);
 
   let alerts = [];
 
@@ -68,7 +71,6 @@ async function main() {
     for (const [key, value] of currentMap.entries()) {
       if (previousMap.has(key)) {
         let diff = value - previousMap.get(key);
-        console.log(diff);
         if (diff < 0) diff *= -1;
         if (diff > alertThreshold) {
           alerts.push(key);
@@ -132,7 +134,7 @@ async function main() {
   try {
     await fsPromises.writeFile(firewatchData, JSON.stringify(Array.from(currentMap.entries())));
   } catch (error) {
-    core.setFailed(`Writing to ${firewatchData} failed with error ${error}`);
+    core.setFailed(`Writing to ${firewatchData} failed with error ${error}.`);
   }
 }
 
@@ -153,7 +155,7 @@ async function downloadPreviousArtifact(octokit, org, repo) {
 
     fs.createReadStream('firewatch.zip')
       .pipe(unzipper.Extract({ path: '' }));
-    core.info(`Extracted previous data successfully`);
+    core.info(`Previous data downloaded and extracted successfully.`);
   }
 }
 
