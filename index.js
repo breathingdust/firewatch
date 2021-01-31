@@ -23,9 +23,9 @@ async function main() {
     } catch (error) {
       core.setFailed(`Getting existing data from '${firewatchData}' failed with error ${error}`);
     }
+    core.info('Firewatch data loaded successfully');
+    core.info(`Existing map has ${previousMap.size} entries.`);
   }
-
-  core.info(`Existing map has ${previousMap.size} entries.`);
 
   let d = new Date();
   d.setMonth(d.getMonth() - issue_age_months);
@@ -117,12 +117,11 @@ async function main() {
     //     core.setFailed(`Posting to slack failed with error ${error}`);
     //   });
     //}
-
-    try {
-      await fsPromises.writeFile(firewatchData, JSON.stringify(Array.from(currentMap.entries())));
-    } catch (error) {
-      core.setFailed(`Writing to ${firewatchData} failed with error ${error}`);
-    }
+  }
+  try {
+    await fsPromises.writeFile(firewatchData, JSON.stringify(Array.from(currentMap.entries())));
+  } catch (error) {
+    core.setFailed(`Writing to ${firewatchData} failed with error ${error}`);
   }
 }
 
