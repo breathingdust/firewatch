@@ -3,7 +3,7 @@ const github = require('@actions/github');
 const axios = require('axios');
 const fsPromises = require('fs').promises;
 const fs = require('fs');
-const unzipper = require('unzipper')
+var Zip = require("adm-zip");
 
 async function main() {
   const firewatchData = 'firewatch.data';
@@ -153,9 +153,8 @@ async function downloadPreviousArtifact(octokit, org, repo) {
 
     await fsPromises.writeFile("firewatch.zip", Buffer.from(artifact.data));
 
-    return fsPromises.createReadStream('firewatch.zip')
-      .pipe(unzipper.Extract({ path: '' }));
-    core.info(`Previous data downloaded and extracted successfully.`);
+    var zip = new Zip("firewatch.zip"); 
+    zip.extractEntryTo("firewatch.data", "./", true, true);
   }
 }
 
