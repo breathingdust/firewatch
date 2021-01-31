@@ -153,6 +153,7 @@ async function downloadPreviousArtifact(octokit, org, repo) {
 
     fs.createReadStream('firewatch.zip')
       .pipe(unzipper.Extract({ path: '' }));
+    core.info(`Extracted previous data successfully`);
   }
 }
 
