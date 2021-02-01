@@ -2,23 +2,20 @@ name: 'Firewatch'
 description: 'Creates slack alerts when an issue in the repository receives reactions faster than a specified threshold.'
 inputs:
   github_token:
-    description: 'A valid github token for the organization'
+    description: 'A valid github token.'
     required: true
   alert_threshold:
-    description: Threshold to use when determining alert status of an issue.
+    description: 'Threshold to use when determining alert status of an issue.''
     required: true
   issue_age_months:
-    description: Age of issues to include.
+    description: 'Age of issues to include.''
     required: true
   slack_token:
-    description: A bot token with the correct scope
+    description: 'A bot token with the correct scope.'
     required: true
   slack_channel:
-    description: Channel identifier
+    description: 'Channel identifier'
     required: true
-outputs:
-  stats:
-    description: 'json object describing results.'
 runs:
   using: 'node12'
   main: 'index.js'
