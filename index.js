@@ -9,7 +9,6 @@ const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
 const firewatchData = 'firewatch.data';
 
 async function main() {
-
   const githubToken = core.getInput('github_token');
   const alertThreshold = core.getInput('alert_threshold');
   const issue_age_months = core.getInput('issue_age_months');
@@ -17,7 +16,7 @@ async function main() {
   const slackChannel = core.getInput('slack_channel');
 
   const octokit = github.getOctokit(githubToken, {
-    previews: ["squirrel-girl"]
+    previews: ["squirrel-girl"] // adds reactions to issue results
   });
 
   try {
