@@ -5,10 +5,10 @@ inputs:
     description: 'A valid github token.'
     required: true
   alert_threshold:
-    description: 'Threshold to use when determining alert status of an issue.''
+    description: 'Threshold to use when determining alert status of an issue.'
     required: true
   issue_age_months:
-    description: 'Age of issues to include.''
+    description: 'Age of issues to include.'
     required: true
   slack_token:
     description: 'A bot token with the correct scope.'
