@@ -124,38 +124,38 @@ async function main() {
       .catch((error) => {
         core.setFailed(`Posting to slack failed with error ${error}`);
       });
+
+    try {
+      await fsPromises.writeFile(firewatchData, JSON.stringify(Array.from(currentMap.entries())));
+    } catch (error) {
+      core.setFailed(`Writing to ${firewatchData} failed with error ${error}.`);
     }
   }
+}
+
+  async function downloadPreviousArtifact(octokit, owner, repo) {
+    const firewatchZip = 'firewatch.zip';
+    let allArtifacts = await octokit.paginate('GET /repos/{owner}/{repo}/actions/artifacts', {
+      owner: owner,
+      repo: repo
+    });
+    let firewatchArtifacts = allArtifacts.filter(x => x.name == 'firewatch');
+
+    if (firewatchArtifacts.length > 0) {
+
+      firewatchArtifacts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      let artifact = await octokit.request(`GET ${firewatchArtifacts[0].archive_download_url}`);
+
+      await fsPromises.writeFile(firewatchZip, Buffer.from(artifact.data));
+
+      var zip = new Zip(firewatchZip);
+      zip.extractEntryTo(firewatchData, "./", true, true);
+    }
+  }
+
   try {
-    await fsPromises.writeFile(firewatchData, JSON.stringify(Array.from(currentMap.entries())));
+    main();
   } catch (error) {
-    core.setFailed(`Writing to ${firewatchData} failed with error ${error}.`);
+    core.setFailed(error.message);
   }
-}
-
-async function downloadPreviousArtifact(octokit, owner, repo) {
-  const firewatchZip = 'firewatch.zip';
-  let allArtifacts = await octokit.paginate('GET /repos/{owner}/{repo}/actions/artifacts', {
-    owner: owner,
-    repo: repo
-  });
-  let firewatchArtifacts = allArtifacts.filter(x => x.name == 'firewatch');
-
-  if (firewatchArtifacts.length > 0) {
-
-    firewatchArtifacts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-    let artifact = await octokit.request(`GET ${firewatchArtifacts[0].archive_download_url}`);
-
-    await fsPromises.writeFile(firewatchZip, Buffer.from(artifact.data));
-
-    var zip = new Zip(firewatchZip); 
-    zip.extractEntryTo(firewatchData, "./", true, true);
-  }
-}
-
-try {
-  main();
-} catch (error) {
-  core.setFailed(error.message);
-}
