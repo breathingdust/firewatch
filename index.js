@@ -93,7 +93,7 @@ async function main() {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `Issues have recieved more than ${alertThreshold} in the configured interval:`,
+            text: `The following issues have recieved more than ${alertThreshold} in the configured interval:`,
           },
         },
         {
@@ -111,20 +111,20 @@ async function main() {
 
     core.info(JSON.stringify(postMessageBody));
 
-    // axios({
-    //   method: 'post',
-    //   url: 'https://slack.com/api/chat.postMessage',
-    //   headers: { Authorization: `Bearer ${slackToken}` },
-    //   data: postMessageBody,
-    // })
-    //   .then((res) => {
-    //     core.info(`Slack Response: ${res.statusCode}`);
-    //     core.info(res.data);
-    //   })
-    //   .catch((error) => {
-    //     core.setFailed(`Posting to slack failed with error ${error}`);
-    //   });
-    //}
+    axios({
+      method: 'post',
+      url: 'https://slack.com/api/chat.postMessage',
+      headers: { Authorization: `Bearer ${slackToken}` },
+      data: postMessageBody,
+    })
+      .then((res) => {
+        core.info(`Slack Response: ${res.statusCode}`);
+        core.info(res.data);
+      })
+      .catch((error) => {
+        core.setFailed(`Posting to slack failed with error ${error}`);
+      });
+    }
   }
   try {
     await fsPromises.writeFile(firewatchData, JSON.stringify(Array.from(currentMap.entries())));
