@@ -83,6 +83,7 @@ async function main() {
   const alerts = [];
 
   if (previousMap.size > 0) {
+    // eslint-disable-next-line no-restricted-syntax
     for (const [key, value] of currentMap.entries()) {
       if (previousMap.has(key)) {
         let diff = value - previousMap.get(key);
