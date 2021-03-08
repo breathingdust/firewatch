@@ -3,20 +3,40 @@ const github = require('@actions/github');
 const axios = require('axios');
 const fsPromises = require('fs').promises;
 const fs = require('fs');
-var Zip = require("adm-zip");
+const Zip = require('adm-zip');
 
-const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 const firewatchData = 'firewatch.data';
+
+async function downloadPreviousArtifact(octokit) {
+  const firewatchZip = 'firewatch.zip';
+  const allArtifacts = await octokit.paginate('GET /repos/{owner}/{repo}/actions/artifacts', {
+    owner,
+    repo,
+  });
+  const firewatchArtifacts = allArtifacts.filter((x) => x.name === 'firewatch');
+
+  if (firewatchArtifacts.length > 0) {
+    firewatchArtifacts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    const artifact = await octokit.request(`GET ${firewatchArtifacts[0].archive_download_url}`);
+
+    await fsPromises.writeFile(firewatchZip, Buffer.from(artifact.data));
+
+    const zip = new Zip(firewatchZip);
+    zip.extractEntryTo(firewatchData, './', true, true);
+  }
+}
 
 async function main() {
   const githubToken = core.getInput('github_token');
   const alertThreshold = core.getInput('alert_threshold');
-  const issue_age_months = core.getInput('issue_age_months');
+  const issueAgeMonths = core.getInput('issue_age_months');
   const slackToken = core.getInput('slack_token');
   const slackChannel = core.getInput('slack_channel');
 
   const octokit = github.getOctokit(githubToken, {
-    previews: ["squirrel-girl"] // adds reactions to issue results
+    previews: ['squirrel-girl'], // adds reactions to issue results
   });
 
   try {
@@ -29,7 +49,7 @@ async function main() {
 
   if (fs.existsSync(firewatchData)) {
     try {
-      let previousMapData = await fsPromises.readFile(firewatchData);
+      const previousMapData = await fsPromises.readFile(firewatchData);
       previousMap = new Map(JSON.parse(previousMapData));
     } catch (error) {
       core.setFailed(`Getting existing data from '${firewatchData}' failed with error ${error}.`);
@@ -40,19 +60,19 @@ async function main() {
     core.info('No previous file found.')
   }
 
-  let d = new Date();
-  d.setMonth(d.getMonth() - issue_age_months);
+  const d = new Date();
+  d.setMonth(d.getMonth() - issueAgeMonths);
 
-  let currentMap = new Map();
+  const currentMap = new Map();
 
-  let issuesResult = await octokit
-    .paginate("GET /search/issues", {
+  const issuesResult = await octokit
+    .paginate('GET /search/issues', {
       q: `is:open repo:${owner}/${repo} created:>${d.toISOString().split('T')[0]
-        }`,
+      }`,
       per_page: 100,
     });
 
-  issuesResult.forEach(issue => {
+  issuesResult.forEach((issue) => {
     if (!currentMap.has(issue.number)) {
       currentMap.set(issue.number, issue.reactions.total_count)
     }
@@ -60,7 +80,7 @@ async function main() {
 
   core.info(`Current map has ${currentMap.size} entries.`);
 
-  let alerts = [];
+  const alerts = [];
 
   if (previousMap.size > 0) {
     for (const [key, value] of currentMap.entries()) {
@@ -70,10 +90,8 @@ async function main() {
         if (diff > alertThreshold) {
           alerts.push(key);
         }
-      } else {
-        if (value > alertThreshold) {
-          alerts.push(key);
-        }
+      } else if (value > alertThreshold) {
+        alerts.push(key);
       }
     }
   }
@@ -82,7 +100,7 @@ async function main() {
 
   if (alerts.length > 0) {
     let alertLines = '';
-    alerts.forEach(alert => {
+    alerts.forEach((alert) => {
       alertLines += `<https://github.com/${owner}/${repo}/issues/${alert}>\n`;
     });
 
@@ -133,29 +151,8 @@ async function main() {
   }
 }
 
-  async function downloadPreviousArtifact(octokit, owner, repo) {
-    const firewatchZip = 'firewatch.zip';
-    let allArtifacts = await octokit.paginate('GET /repos/{owner}/{repo}/actions/artifacts', {
-      owner: owner,
-      repo: repo
-    });
-    let firewatchArtifacts = allArtifacts.filter(x => x.name == 'firewatch');
-
-    if (firewatchArtifacts.length > 0) {
-
-      firewatchArtifacts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-      let artifact = await octokit.request(`GET ${firewatchArtifacts[0].archive_download_url}`);
-
-      await fsPromises.writeFile(firewatchZip, Buffer.from(artifact.data));
-
-      var zip = new Zip(firewatchZip);
-      zip.extractEntryTo(firewatchData, "./", true, true);
-    }
-  }
-
-  try {
-    main();
-  } catch (error) {
-    core.setFailed(error.message);
-  }
+try {
+  main();
+} catch (error) {
+  core.setFailed(error.message);
+}
