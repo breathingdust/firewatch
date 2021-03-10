@@ -2,7 +2,7 @@ const core = require('@actions/core');
 
 const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
-export default {
+module.exports = {
   githubToken: core.getInput('github_token'),
   alertThreshold: core.getInput('alert_threshold'),
   issueAgeMonths: core.getInput('issue_age_months'),

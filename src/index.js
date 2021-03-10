@@ -4,7 +4,7 @@ const axios = require('axios');
 const fsPromises = require('fs').promises;
 const fs = require('fs');
 const Zip = require('adm-zip');
-const config = require('./config').default;
+const config = require('./config');
 
 async function downloadPreviousArtifact(octokit) {
   const allArtifacts = await octokit.paginate('GET /repos/{owner}/{repo}/actions/artifacts', {
