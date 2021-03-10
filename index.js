@@ -7,6 +7,7 @@ const Zip = require('adm-zip');
 
 const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 const firewatchData = 'firewatch.data';
+const artifactFormatVerson = '1.0';
 
 async function downloadPreviousArtifact(octokit) {
   const firewatchZip = 'firewatch.zip';
@@ -49,32 +50,39 @@ async function main() {
 
   if (fs.existsSync(firewatchData)) {
     try {
-      const previousMapData = await fsPromises.readFile(firewatchData);
-      previousMap = new Map(JSON.parse(previousMapData));
+      const previousMapData = JSON.parse(await fsPromises.readFile(firewatchData));
+      if (previousMapData.version !== artifactFormatVerson) {
+        core.info('Previous artifact has a different version format.');
+      } else {
+        previousMap = new Map(previousMapData.data);
+      }
     } catch (error) {
       core.setFailed(`Getting existing data from '${firewatchData}' failed with error ${error}.`);
     }
     core.info('Firewatch data loaded successfully');
     core.info(`Existing map has ${previousMap.size} entries.`);
   } else {
-    core.info('No previous file found.')
+    core.info('No previous file found.');
   }
 
-  const d = new Date();
-  d.setMonth(d.getMonth() - issueAgeMonths);
+  const dateThreshold = new Date();
+  dateThreshold.setMonth(dateThreshold.getMonth() - issueAgeMonths);
 
   const currentMap = new Map();
 
   const issuesResult = await octokit
     .paginate('GET /search/issues', {
-      q: `is:open repo:${owner}/${repo} created:>${d.toISOString().split('T')[0]
-      }`,
+      q: `is:open repo:${owner}/${repo} created:>${dateThreshold.toISOString().split('T')[0]}`,
       per_page: 100,
     });
 
   issuesResult.forEach((issue) => {
     if (!currentMap.has(issue.number)) {
-      currentMap.set(issue.number, issue.reactions.total_count)
+      currentMap.set(issue.number, {
+        reactions: issue.reactions.total_count,
+        title: issue.title,
+        id: issue.number,
+      });
     }
   });
 
@@ -86,13 +94,13 @@ async function main() {
     // eslint-disable-next-line no-restricted-syntax
     for (const [key, value] of currentMap.entries()) {
       if (previousMap.has(key)) {
-        let diff = value - previousMap.get(key);
+        let diff = value.reactions - previousMap.get(key).reactions;
         if (diff < 0) diff *= -1;
         if (diff > alertThreshold) {
-          alerts.push(key);
+          alerts.push(value);
         }
-      } else if (value > alertThreshold) {
-        alerts.push(key);
+      } else if (value.reactions > alertThreshold) {
+        alerts.push(value);
       }
     }
   }
@@ -102,7 +110,7 @@ async function main() {
   if (alerts.length > 0) {
     let alertLines = '';
     alerts.forEach((alert) => {
-      alertLines += `<https://github.com/${owner}/${repo}/issues/${alert}>\n`;
+      alertLines += `${alert.title} <https://github.com/${owner}/${repo}/issues/${alert.id}>\n`;
     });
 
     const postMessageBody = {
@@ -112,7 +120,7 @@ async function main() {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `The following issues have recieved more than ${alertThreshold} in the configured interval:`,
+            text: `The following issues have received more than ${alertThreshold} reactions in the configured time interval:`,
           },
         },
         {
@@ -145,7 +153,12 @@ async function main() {
       });
 
     try {
-      await fsPromises.writeFile(firewatchData, JSON.stringify(Array.from(currentMap.entries())));
+      await fsPromises.writeFile(firewatchData, JSON.stringify(
+        {
+          version: artifactFormatVerson,
+          data: Array.from(currentMap.entries()),
+        },
+      ));
     } catch (error) {
       core.setFailed(`Writing to ${firewatchData} failed with error ${error}.`);
     }
