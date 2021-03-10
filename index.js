@@ -59,7 +59,7 @@ async function main() {
     } catch (error) {
       core.setFailed(`Getting existing data from '${firewatchData}' failed with error ${error}.`);
     }
-    core.info('Firewatch data loaded successfully');
+    core.info('Firewatch data loaded successfully.');
     core.info(`Existing map has ${previousMap.size} entries.`);
   } else {
     core.info('No previous file found.');
@@ -95,7 +95,7 @@ async function main() {
         data: Array.from(currentMap.entries()),
       },
     ));
-    core.info('Firewatch.data successfully written.');
+    core.info('Firewatch data successfully written.');
   } catch (error) {
     core.setFailed(`Writing to ${firewatchData} failed with error ${error}.`);
   }
@@ -122,7 +122,7 @@ async function main() {
   if (alerts.length > 0) {
     let alertLines = '';
     alerts.forEach((alert) => {
-      alertLines += `${alert.title} <https://github.com/${owner}/${repo}/issues/${alert.id}>\n`;
+      alertLines += `<https://github.com/${owner}/${repo}/issues/${alert.id}|${alert.title}>\n`;
     });
 
     const postMessageBody = {
@@ -158,7 +158,7 @@ async function main() {
     })
       .then((res) => {
         core.info(`Slack Response: ${res.statusCode}`);
-        core.info(res.data);
+        core.info(JSON.stringify(res.data));
       })
       .catch((error) => {
         core.setFailed(`Posting to slack failed with error ${error}`);
