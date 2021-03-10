@@ -88,6 +88,18 @@ async function main() {
 
   core.info(`Current map has ${currentMap.size} entries.`);
 
+  try {
+    await fsPromises.writeFile(firewatchData, JSON.stringify(
+      {
+        version: artifactFormatVerson,
+        data: Array.from(currentMap.entries()),
+      },
+    ));
+    core.info('Firewatch.data successfully written.');
+  } catch (error) {
+    core.setFailed(`Writing to ${firewatchData} failed with error ${error}.`);
+  }
+
   const alerts = [];
 
   if (previousMap.size > 0) {
@@ -151,17 +163,6 @@ async function main() {
       .catch((error) => {
         core.setFailed(`Posting to slack failed with error ${error}`);
       });
-
-    try {
-      await fsPromises.writeFile(firewatchData, JSON.stringify(
-        {
-          version: artifactFormatVerson,
-          data: Array.from(currentMap.entries()),
-        },
-      ));
-    } catch (error) {
-      core.setFailed(`Writing to ${firewatchData} failed with error ${error}.`);
-    }
   }
 }
 
