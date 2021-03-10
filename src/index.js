@@ -1,10 +1,10 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const axios = require('axios');
 const fsPromises = require('fs').promises;
 const fs = require('fs');
 const Zip = require('adm-zip');
 const config = require('./config');
+const slack = require('./slackClient');
 
 async function downloadPreviousArtifact(octokit) {
   const allArtifacts = await octokit.paginate('GET /repos/{owner}/{repo}/actions/artifacts', {
@@ -110,49 +110,7 @@ async function main() {
   core.info(`${alerts.length} alerts found.`);
 
   if (alerts.length > 0) {
-    let alertLines = '';
-    alerts.forEach((alert) => {
-      alertLines += `<https://github.com/${config.owner}/${config.repo}/issues/${alert.id}|${alert.title}>\n`;
-    });
-
-    const postMessageBody = {
-      channel: config.slackChannel,
-      blocks: [
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `The following issues have received more than ${config.alertThreshold} reactions in the configured time interval:`,
-          },
-        },
-        {
-          type: 'divider',
-        },
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: alertLines,
-          },
-        },
-      ],
-    };
-
-    core.info(JSON.stringify(postMessageBody));
-
-    axios({
-      method: 'post',
-      url: 'https://slack.com/api/chat.postMessage',
-      headers: { Authorization: `Bearer ${config.slackToken}` },
-      data: postMessageBody,
-    })
-      .then((res) => {
-        core.info(`Slack Response: ${res.statusCode}`);
-        core.info(JSON.stringify(res.data));
-      })
-      .catch((error) => {
-        core.setFailed(`Posting to slack failed with error ${error}`);
-      });
+    slack.sendAlerts(alerts);
   }
 }
 
