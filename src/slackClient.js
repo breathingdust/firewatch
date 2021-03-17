@@ -33,19 +33,19 @@ function sendAlerts(alerts) {
 
   core.info(JSON.stringify(postMessageBody));
 
-  axios({
-    method: 'post',
-    url: 'https://slack.com/api/chat.postMessage',
-    headers: { Authorization: `Bearer ${config.slackToken}` },
-    data: postMessageBody,
-  })
-    .then((res) => {
-      core.info(`Slack Response: ${res.statusCode}`);
-      core.info(JSON.stringify(res.data));
-    })
-    .catch((error) => {
-      core.setFailed(`Posting to slack failed with error ${error}`);
-    });
+  // axios({
+  //   method: 'post',
+  //   url: 'https://slack.com/api/chat.postMessage',
+  //   headers: { Authorization: `Bearer ${config.slackToken}` },
+  //   data: postMessageBody,
+  // })
+  //   .then((res) => {
+  //     core.info(`Slack Response: ${res.statusCode}`);
+  //     core.info(JSON.stringify(res.data));
+  //   })
+  //   .catch((error) => {
+  //     core.setFailed(`Posting to slack failed with error ${error}`);
+  //   });
 }
 
 module.exports = {
