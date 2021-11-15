@@ -11,7 +11,7 @@ async function downloadPreviousArtifact(octokit) {
     owner: config.owner,
     repo: config.repo,
   });
-  const firewatchArtifacts = allArtifacts.filter((x) => x.name === 'firewatch');
+  const firewatchArtifacts = allArtifacts.filter((x) => x.name === 'firewatch' && x.expired === false);
 
   if (firewatchArtifacts.length > 0) {
     firewatchArtifacts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
