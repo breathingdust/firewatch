@@ -17,5 +17,5 @@ inputs:
     description: 'Channel identifier'
     required: true
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'src/index.js'
