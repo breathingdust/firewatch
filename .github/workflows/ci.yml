@@ -1,11 +1,5 @@
 name: ci
 on: push
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Install modules
-      run: npm install
-    - name: Run ESLint
-      run: eslint .
+  basic-validation-call:
+    uses: actions/reusable-workflows/.github/workflows/basic-validation.yml@main
