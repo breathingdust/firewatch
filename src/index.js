@@ -7,16 +7,25 @@ const config = require('./config');
 const slack = require('./slackClient');
 
 async function downloadPreviousArtifact(octokit) {
-  const allArtifacts = await octokit.paginate('GET /repos/{owner}/{repo}/actions/artifacts', {
-    owner: config.owner,
-    repo: config.repo,
-  });
-  const firewatchArtifacts = allArtifacts.filter((x) => x.name === 'firewatch' && x.expired === false);
+  const allArtifacts = await octokit.paginate(
+    'GET /repos/{owner}/{repo}/actions/artifacts',
+    {
+      owner: config.owner,
+      repo: config.repo,
+    },
+  );
+  const firewatchArtifacts = allArtifacts.filter(
+    (x) => x.name === 'firewatch' && x.expired === false,
+  );
 
   if (firewatchArtifacts.length > 0) {
-    firewatchArtifacts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    firewatchArtifacts.sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at),
+    );
 
-    const artifact = await octokit.request(`GET ${firewatchArtifacts[0].archive_download_url}`);
+    const artifact = await octokit.request(
+      `GET ${firewatchArtifacts[0].archive_download_url}`,
+    );
 
     await fsPromises.writeFile(config.firewatchZip, Buffer.from(artifact.data));
 
@@ -40,14 +49,18 @@ async function main() {
 
   if (fs.existsSync(config.firewatchData)) {
     try {
-      const previousMapData = JSON.parse(await fsPromises.readFile(config.firewatchData));
+      const previousMapData = JSON.parse(
+        await fsPromises.readFile(config.firewatchData),
+      );
       if (previousMapData.version !== config.artifactFormatVerson) {
         core.info('Previous artifact has a different version format.');
       } else {
         previousMap = new Map(previousMapData.data);
       }
     } catch (error) {
-      core.setFailed(`Getting existing data from '${config.firewatchData}' failed with error ${error}.`);
+      core.setFailed(
+        `Getting existing data from '${config.firewatchData}' failed with error ${error}.`,
+      );
     }
     core.info('Firewatch data loaded successfully.');
     core.info(`Existing map has ${previousMap.size} entries.`);
@@ -60,11 +73,12 @@ async function main() {
 
   const currentMap = new Map();
 
-  const issuesResult = await octokit
-    .paginate('GET /search/issues', {
-      q: `is:open repo:${config.owner}/${config.repo} created:>${dateThreshold.toISOString().split('T')[0]}`,
-      per_page: 100,
-    });
+  const issuesResult = await octokit.paginate('GET /search/issues', {
+    q: `is:open repo:${config.owner}/${config.repo} created:>${
+      dateThreshold.toISOString().split('T')[0]
+    }`,
+    per_page: 100,
+  });
 
   issuesResult.forEach((issue) => {
     if (!currentMap.has(issue.number)) {
@@ -79,15 +93,18 @@ async function main() {
   core.info(`Current map has ${currentMap.size} entries.`);
 
   try {
-    await fsPromises.writeFile(config.firewatchData, JSON.stringify(
-      {
+    await fsPromises.writeFile(
+      config.firewatchData,
+      JSON.stringify({
         version: config.artifactFormatVerson,
         data: Array.from(currentMap.entries()),
-      },
-    ));
+      }),
+    );
     core.info('Firewatch data successfully written.');
   } catch (error) {
-    core.setFailed(`Writing to ${config.firewatchData} failed with error ${error}.`);
+    core.setFailed(
+      `Writing to ${config.firewatchData} failed with error ${error}.`,
+    );
   }
 
   const alerts = [];

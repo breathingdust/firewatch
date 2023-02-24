@@ -1,13 +1,24 @@
 {
   "name": "firewatch",
-  "version": "1.0.0",
+  "version": "2.0.2",
   "description": "Monitors a GitHub repository for issues or pull requests that receive upvotes over a certain rate in a timeperiod",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint src/",
+    "format-check": "prettier --check src/",
+    "all": "npm run lint && npm run format-check"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Simon Davis",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/breathingdust/firewatch/issues"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all"
+  },
+  "homepage": "https://github.com/breathingdust/firewatch#readme",
   "dependencies": {
     "@actions/core": "^1.10.0",
     "@actions/github": "^4.0.0",
@@ -17,6 +28,7 @@
   "devDependencies": {
     "eslint": "^7.21.0",
     "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-import": "^2.22.1"
+    "eslint-plugin-import": "^2.22.1",
+    "prettier": "2.8.4"
   }
 }
