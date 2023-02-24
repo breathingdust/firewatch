@@ -1,6 +1,9 @@
 const core = require('@actions/core');
 
-const [owner, repo] = process.env.NODE_ENV !== 'test' ? process.env.GITHUB_REPOSITORY.split('/') : ['', ''];
+const [owner, repo] =
+  process.env.NODE_ENV !== 'test'
+    ? process.env.GITHUB_REPOSITORY.split('/')
+    : ['', ''];
 
 module.exports = {
   githubToken: core.getInput('github_token'),
