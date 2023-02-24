@@ -1,5 +1,10 @@
 name: ci
-on: push
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'releases/*'
 jobs:
   basic-validation-call:
     uses: actions/reusable-workflows/.github/workflows/basic-validation.yml@main
