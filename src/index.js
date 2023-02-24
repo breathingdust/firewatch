@@ -127,7 +127,8 @@ async function main() {
   core.info(`${alerts.length} alerts found.`);
 
   if (alerts.length > 0) {
-    slack.sendAlerts(alerts);
+    const alertBody = slack.formatAlerts(alerts);
+    slack.sendAlerts(alertBody);
   }
 }
 

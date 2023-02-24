@@ -2,10 +2,10 @@ const core = require('@actions/core');
 const axios = require('axios');
 const config = require('./config');
 
-function sendAlerts(alerts) {
+function formatAlerts(alerts) {
   let alertLines = '';
   alerts.forEach((alert) => {
-    alertLines += `<https://github.com/${config.owner}/${config.repo}/issues/${alert.id}|${alert.title}>\n`;
+    alertLines += `<https://github.com/${config.owner}/${config.repo}/issues/${alert.id}|${alert.title}> - ${alert.reactions} reactions\n`;
   });
 
   const postMessageBody = {
@@ -33,11 +33,15 @@ function sendAlerts(alerts) {
 
   core.info(JSON.stringify(postMessageBody));
 
+  return postMessageBody;
+}
+
+function sendAlerts(body) {
   axios({
     method: 'post',
     url: 'https://slack.com/api/chat.postMessage',
     headers: { Authorization: `Bearer ${config.slackToken}` },
-    data: postMessageBody,
+    data: body,
   })
     .then((res) => {
       core.info(`Slack Response: ${res.statusCode}`);
@@ -50,4 +54,5 @@ function sendAlerts(alerts) {
 
 module.exports = {
   sendAlerts,
+  formatAlerts,
 };
