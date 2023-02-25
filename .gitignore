@@ -2,3 +2,4 @@ firewatch.*
 index_local.js
 secrets.data
 dist/
+node_modules/
