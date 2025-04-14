@@ -1,6 +1,5 @@
 const core = require('@actions/core');
 
-// eslint-disable-next-line operator-linebreak
 const [owner, repo] =
   process.env.NODE_ENV !== 'test'
     ? process.env.GITHUB_REPOSITORY.split('/')
