@@ -20,8 +20,8 @@ In summary, the process occurs as follows:
   exists.
 - Pull all issues for the specified time period and save it to a file.
 - Compare the historical data with the current data, and if any issue has
-  accrued more reactions than the configured threshold [alert_threshold](<>) add
-  it to an alert set.
+  accrued more reactions than the configured threshold `alert_threshold` add it
+  to an alert set.
 - If the alert set is not empty, post a message to the configured Slack channel
   detailing the issue.
 
