@@ -42,9 +42,7 @@ export async function run() {
 }
 
 async function main() {
-  const octokit = github.getOctokit(config.githubToken, {
-    previews: ['squirrel-girl'] // adds reactions to issue results
-  })
+  const octokit = github.getOctokit(config.githubToken)
 
   try {
     await downloadPreviousArtifact(octokit, config.owner, config.repo)
