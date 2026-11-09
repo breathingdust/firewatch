@@ -87,9 +87,7 @@ describe('main.js', () => {
 
     await run()
 
-    expect(mockGetOctokit).toHaveBeenCalledWith('gh-token', {
-      previews: ['squirrel-girl']
-    })
+    expect(mockGetOctokit).toHaveBeenCalledWith('gh-token')
     expect(mockCore.info).toHaveBeenCalledWith('No previous file found.')
     expect(mockFs.promises.writeFile).toHaveBeenCalledWith(
       'firewatch.data',
