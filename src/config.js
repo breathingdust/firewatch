@@ -1,11 +1,8 @@
-const core = require('@actions/core');
+import * as core from '@actions/core'
 
-const [owner, repo] =
-  process.env.NODE_ENV !== 'test'
-    ? process.env.GITHUB_REPOSITORY.split('/')
-    : ['', ''];
+const [owner = '', repo = ''] = (process.env.GITHUB_REPOSITORY ?? '').split('/')
 
-module.exports = {
+export default {
   githubToken: core.getInput('github_token'),
   alertThreshold: core.getInput('alert_threshold'),
   issueAgeMonths: core.getInput('issue_age_months'),
@@ -15,5 +12,5 @@ module.exports = {
   repo,
   firewatchData: 'firewatch.data',
   firewatchZip: 'firewatch.zip',
-  artifactFormatVerson: '1.0',
-};
+  artifactFormatVerson: '1.0'
+}
