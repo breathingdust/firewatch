@@ -117,6 +117,22 @@ describe('main.js', () => {
     )
   })
 
+  it('lists only firewatch artifacts', async () => {
+    mockGitHub()
+
+    await run()
+
+    const [, params] = mockOctokit.paginate.mock.calls.find(
+      ([route]) => route === 'GET /repos/{owner}/{repo}/actions/artifacts'
+    )
+    expect(params).toEqual({
+      owner: 'owner',
+      repo: 'repo',
+      name: 'firewatch',
+      per_page: 100
+    })
+  })
+
   it('downloads and extracts the newest unexpired firewatch artifact', async () => {
     mockGitHub({
       artifacts: [
