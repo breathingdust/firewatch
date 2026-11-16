@@ -5,7 +5,7 @@
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest",
     "lint": "npx eslint .",
-    "all": "npm run format:write && npm run lint && npm run test && npm run package",
+    "all": "npm ci && npm run format:write && npm run lint && npm run test && npm run package",
     "bundle": "npm run format:write && npm run package",
     "ci-test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest",
     "format:write": "npx prettier --write .",

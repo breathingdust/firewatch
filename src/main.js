@@ -10,7 +10,9 @@ async function downloadPreviousArtifact(octokit) {
     'GET /repos/{owner}/{repo}/actions/artifacts',
     {
       owner: config.owner,
-      repo: config.repo
+      repo: config.repo,
+      name: 'firewatch',
+      per_page: 100
     }
   )
   const firewatchArtifacts = allArtifacts.filter(
